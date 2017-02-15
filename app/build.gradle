@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    buildTypes.each {
+        it.buildConfigField "String", "Google_Maps_Geocoding_Api_Key", "\"***REMOVED***\""
+    }
 }
 repositories {
     mavenCentral()
@@ -34,6 +37,8 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:9.0.0'
     compile 'com.google.android.gms:play-services-auth:9.0.0'
     compile 'com.facebook.android:facebook-android-sdk:4.19.0'
+    compile 'com.google.android.gms:play-services-maps:9.0.0'
+    compile 'com.google.android.gms:play-services-appindexing:9.0.0'
 
 }
 apply plugin: 'com.google.gms.google-services'
