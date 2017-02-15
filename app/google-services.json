@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1043366741797",
+    "firebase_url": "https://ar-city-guide.firebaseio.com",
+    "project_id": "ar-city-guide",
+    "storage_bucket": "ar-city-guide.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043366741797:android:9bbbecd84d65cf07",
+        "android_client_info": {
+          "package_name": "com.project.meetu.arcityguide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043366741797-0me9gln5gc7h1vvojoen1cnbcebi0128.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.project.meetu.arcityguide",
+            "certificate_hash": "05E300169F88BBD2421A61F3EC40345C66382CEE"
+          }
+        },
+        {
+          "client_id": "1043366741797-t8ac0evenohlsjimg7kllb0det985qmf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA550UgMoblSRTb8Vhl43FJgk_5a3U9X10"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043366741797-t8ac0evenohlsjimg7kllb0det985qmf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
