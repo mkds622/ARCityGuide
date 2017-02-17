@@ -51,9 +51,9 @@ public class InputActivity extends AppCompatActivity {
         Button B1 = (Button) findViewById(R.id.button);
         B1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //Intent I1 = new Intent(getApplicationContext(),MapActivity.class);
-                //I1.putExtra(EXTRA_MESSAGE,E1.getText().toString() + "@" +E2.getText().toString());
-                //startActivity(I1);
+                Intent I1 = new Intent(getApplicationContext(),NavigationActivity.class);
+                I1.putExtra(EXTRA_MESSAGE,E1.getText().toString() + "@" +E2.getText().toString());
+                startActivity(I1);
                 //Log.e(LOG_TAG, "POINTS TO BE TRAVELLED:" + points);
 
             }
