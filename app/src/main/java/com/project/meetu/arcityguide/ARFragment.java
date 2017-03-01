@@ -65,7 +65,7 @@ public class ARFragment extends Fragment implements FragmentCompat.OnRequestPerm
             }
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
-    private static final String TAG = "CameraBasicActivity";
+    private static final String TAG = "Basic Camera Fragment";
     private static final int MAX_PREVIEW_WIDTH = 1920;
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
