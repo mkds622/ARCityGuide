@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static android.R.attr.max;
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -42,6 +43,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 public class coordinateTask extends AsyncTask<String,Void, ArrayList<LatLng>> {
 
     public ArrayList<LatLng> points ;
+    MapFragment mapFragment;
     GoogleMap Map1;
     GoogleMapOptions map1options;
     Activity context;
@@ -52,9 +54,12 @@ public class coordinateTask extends AsyncTask<String,Void, ArrayList<LatLng>> {
     String resultString = null;
 
 
-    coordinateTask(Activity context){
+    coordinateTask(Activity context,MapFragment mapFragment,GoogleMap Map1){
         this.context=context;
+        this.mapFragment=mapFragment;
+        this.Map1= Map1;
     }
+
     @Override
     protected ArrayList<LatLng> doInBackground(String... params) {
         try {
@@ -96,7 +101,9 @@ public class coordinateTask extends AsyncTask<String,Void, ArrayList<LatLng>> {
             }
             resultString = buffer.toString();
             ArrayList<LatLng> points =jsonParse(resultString);
+            Log.v(LOG_TAG,points.toString());
             return points;
+
         } catch (IOException e) {
             Log.w(LOG_TAG, "Error ", e);
         } finally {
@@ -111,49 +118,34 @@ public class coordinateTask extends AsyncTask<String,Void, ArrayList<LatLng>> {
                 }
             }
         }
-        return null;
+        return points;
     }
     protected void onPostExecute(final ArrayList<LatLng> points) {
-        map1options= new GoogleMapOptions();
-        map1options.mapType(GoogleMap.MAP_TYPE_TERRAIN)
-                .compassEnabled(true)
-                .rotateGesturesEnabled(true)
-                .tiltGesturesEnabled(true);
-        MapFragment mapFragment = (MapFragment) context.getFragmentManager().findFragmentById(R.id.map1);
-        MapFragment.newInstance(map1options);
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap map) {
 
-                Map1=map;
-                //Map1.setMaxZoomPreference(14.0f);
-                //Map1.setMinZoomPreference(6.0f);
-                LatLng src=new LatLng(0.0,0.0);
-                src=points.get(0);
-                LatLng dest=new LatLng(0.0,0.0);
-                dest=points.get(points.size()-1);
-                drawMarker(Map1,src,dest);
-                Map1.moveCamera(CameraUpdateFactory.newLatLngZoom(src, 15));
-                PolylineOptions polylineOptions = new PolylineOptions();
-
+        //MapFragment mapFragment=MapFragment.newInstance(map1options);
+        LatLng src=new LatLng(0.0,0.0);
+        src=points.get(0);
+        LatLng dest=new LatLng(0.0,0.0);
+        dest=points.get(points.size()-1);
+        drawMarker(Map1,src,dest);
+        PolylineOptions polylineOptions = new PolylineOptions();
+        Map1.moveCamera(CameraUpdateFactory.newLatLngZoom(src, 15));
 // Create polyline options with existing LatLng ArrayList
-                polylineOptions.addAll(points);
-                polylineOptions
-                        .width(15)
-                        .color(Color.RED);
-                Polyline l1=Map1.addPolyline(polylineOptions);
-                //l1.setJointType(JointType.ROUND);
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(src)
-                        .zoom(max)
-                        .tilt(90)
-                        .build();
-                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                //UiSettings ui=Map1.getUiSettings();
-                //ui.setAllGesturesEnabled(true);
-                Toast.makeText(context, "MapReady", Toast.LENGTH_SHORT).show();
-            }
-        });
+        polylineOptions.addAll(points);
+        polylineOptions
+                .width(15)
+                .color(Color.RED);
+        Polyline l1=Map1.addPolyline(polylineOptions);
+        //l1.setJointType(JointType.ROUND);
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(src)
+                .zoom(max)
+                .tilt(90)
+                .build();
+        Map1.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        //UiSettings ui=Map1.getUiSettings();
+        //ui.setAllGesturesEnabled(true);
+        Toast.makeText(context, "MapReady", Toast.LENGTH_SHORT).show();
     }
     public void drawMarker(GoogleMap map1,LatLng source_point,LatLng destination_point) {
 

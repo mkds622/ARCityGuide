@@ -23,6 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -47,25 +48,54 @@ import static android.R.attr.max;
  * Created by Meetu on 17-02-2017.
  */
 
-public class MapFragment1 extends Fragment {
+public class MapFragment1 extends Fragment{
 
+    coordinateTask c1;
+    Marker mLocationMarker;
+    GoogleMap Map1;
+    MapFragment mapFragment;
+    ArrayList<LatLng> points;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
+        View view=inflater.inflate(R.layout.fragment_map, container, false);
         //setContentView(R.layout.fragment_map);
+        mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map1);
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap map) {
 
-        coordinateTask c1 = new coordinateTask(getActivity());
-
-        List<String> A= Arrays.asList(NavigationActivity.passedOn.split("@"));
-        String Origin=A.get(0);
-        String Destination=A.get(1);
-        c1.execute(Origin,Destination);
+                Map1=map;
+                //Map1.setMaxZoomPreference(14.0f);
+                //Map1.setMinZoomPreference(6.0f);
+                continueOnCreate();
 
 
-        return inflater.inflate(R.layout.fragment_map, container, false);
+            }
+        });
+
+
+
+        return view ;
+    }
+    public void continueOnCreate() {
+        coordinateTask c1 = new coordinateTask(getActivity(), mapFragment, Map1);
+        String Origin = NavigationActivity.inputs.get(0);
+        String Destination = NavigationActivity.inputs.get(1);
+        try {
+            points = c1.execute(Origin, Destination).get();
+            NavigationActivity.setPoints(points);
+        }catch(Exception e){
+
+        }
     }
     public static MapFragment1 newInstance() {
         return new MapFragment1();
+    }
+    public Marker addLocationMarker(MarkerOptions mLocationMarkerOptions){
+
+        mLocationMarker= Map1.addMarker(mLocationMarkerOptions);
+        return mLocationMarker;
     }
 }
