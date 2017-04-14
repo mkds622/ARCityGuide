@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.Surface;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,6 +43,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.project.meetu.arcityguide.PolyUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Vector;
 
 import static android.webkit.ConsoleMessage.MessageLevel.LOG;
+import static com.google.ads.AdRequest.LOGTAG;
 
 /**
  * Created by Meetu on 17-02-2017.
@@ -68,6 +70,7 @@ public class NavigationActivity extends FragmentActivity implements
     public static ArrayList<LatLng> points;//to be updated in rerouting
     LatLng next;//to be updated in rerouting
     static LatLng dest;//to be verified in rerouting
+    static List<LatLng> temp;//to be changed in rerouting
     static int size;//to be updated in rerouting
     //for location
     int permissionCheck;
@@ -103,7 +106,7 @@ public class NavigationActivity extends FragmentActivity implements
 
 
     private static final String LOGTAG = "Navigation Activity";
-    private LocationRequest mLocationRequest1;
+    static Polyline p1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,20 +116,7 @@ public class NavigationActivity extends FragmentActivity implements
         //initialize location marker
         MapsInitializer.initialize(getApplicationContext());
         locationIcon = BitmapDescriptorFactory.fromResource(R.drawable.mylocationmarker);
-
-        //Receive Intent and get src and dest locations....
-        Intent I1 = getIntent();
-        passedOn = I1.getStringExtra(InputActivity.EXTRA_MESSAGE);
-        inputs = Arrays.asList(NavigationActivity.passedOn.split("@"));
-
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        N1 = new NavFragmentAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(N1);
-        mViewPager.setCurrentItem(0);
-
-        //Below code is for continually extracting sensor data and GPS data which we will use for navigation purposes
+//Below code is for continually extracting sensor data and GPS data which we will use for navigation purposes
         mRequestingLocationUpdates = false;
         toast1 = Toast.makeText(getApplicationContext(), "AR Fragment", Toast.LENGTH_SHORT);
         toast2 = Toast.makeText(getApplicationContext(), "Map Fragment", Toast.LENGTH_SHORT);
@@ -137,65 +127,50 @@ public class NavigationActivity extends FragmentActivity implements
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .enableAutoManage(this /* FragmentActivity */,
+                            this /* OnConnectionFailedListener */)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
         }
-        //mLatitudeText=(TextView)findViewById(R.id.textView1);
-        //mLongitudeText=(TextView)findViewById(R.id.textView2);
 
         createLocationRequest();
         builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
         result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
                 builder.build());
-/*        permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        //mGoogleApiClient.connect();
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-
-            } else {
-
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOACTION);
-
-            }
-        }*/
-//        if(mGoogleApiClient.isConnected()) {
-//            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-//        } else {
-//            mGoogleApiClient.connect();
-//            mLocationRequest = LocationRequest.create()
-//                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-//                   .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-//                    .setFastestInterval(1 * 1000);
-//            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-//            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-            Log.e(LOGTAG, "!!!!!!!!Location=" + mLastLocation + "!!!!!!!");
-//        }
-
-        /*mLastLocation=new Location("");
-        mLastLocation.setLatitude(0);
-        mLastLocation.setLongitude(0);
-        mLastLocation.setAltitude(0);*/
-
-        //Orientation
-        //orientationTextView=(TextView)findViewById(R.id.textView6);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        //Receive Intent and get src and dest locations....
+        Intent I1 = getIntent();
+        passedOn = I1.getStringExtra(InputActivity.EXTRA_MESSAGE);
+        inputs = Arrays.asList(NavigationActivity.passedOn.split("@"));
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        N1 = new NavFragmentAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(N1);
+        mViewPager.setCurrentItem(0);
+
+
 
     }
 
     public static void setPoints(ArrayList<LatLng> points1) {
         points = points1;
         size = points.size();
-        dest = points.get(size-1);}
+        dest = points.get(size - 1);
+        temp=new ArrayList<>();
+        temp.add(dest);
+        navCount=0;
+    }
 
+    public static void setPolyline(Polyline P1){
+        p1=P1;
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -213,13 +188,13 @@ public class NavigationActivity extends FragmentActivity implements
         }
     }
 
-
+    @Override
     protected void onStart() {
 
-            mGoogleApiClient.connect();
-            super.onStart();
+        mGoogleApiClient.connect();
+        super.onStart();
     }
-
+    @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
@@ -301,28 +276,52 @@ public class NavigationActivity extends FragmentActivity implements
         mLastLocation = location;
         mLastLocation1 = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
         Log.d("OnLocationChanged()", "mLastLocation=" + mLastLocation.getLatitude() + " " + mLastLocation.getLongitude() + "mLastLocation1=" + mLastLocation1);
-        next = points.get(navCount);
-        Log.d("OnLocationChanged()", "next" + next);
-        if (points != null) {
-            if (mLastLocation1.latitude == dest.latitude && mLastLocation1.longitude == dest.longitude) {
-                //endNavigation(true);
+        try{
+            int x=PolyUtil.locationIndexOnPath(mLastLocation1,points,true,30);
+            Log.e(LOGTAG,"x="+x +"navcount="+navCount + "NavErrorCOunt="+navErrorCount);
+            if(PolyUtil.isLocationOnPath(mLastLocation1,temp,true,20)==true)
+            {
+                Toast.makeText(this,"NavgationComplete", Toast.LENGTH_LONG);
+
             }
-            if (mLastLocation1.latitude == next.latitude && mLastLocation1.longitude == next.longitude) {
-                navCount += 1;
-                navErrorCount = 0;
-            } else if (navErrorCount < 11) {
-                navErrorCount += 1;
-            } else {
-                Toast.makeText(this, "Have to reroute", Toast.LENGTH_SHORT).show();
-                navCount = 0;
+            if(x==-1){
+                navErrorCount+=1;
+                if(navErrorCount>11){
+                    Toast.makeText(this, "Have to reroute", Toast.LENGTH_SHORT).show();
+                    navCount = 0;
+                    navErrorCount=0;
                 //pauseNavigationAndRecord();
                 //reroute(points,navCount);
+                }
             }
+            else{
+                navCount=x;
+
+            }
+            Log.d("OnLocationChanged()", "next" + next);
+
+//            if (mLastLocation1.latitude == dest.latitude && mLastLocation1.longitude == dest.longitude) {
+//                //endNavigation(true);
+//            }
+//            if (mLastLocation1.latitude == next.latitude && mLastLocation1.longitude == next.longitude) {
+//                navCount += 1;
+//                navErrorCount = 0;
+//            } else if (navErrorCount < 11) {
+//                navErrorCount += 1;
+//            } else {
+//                Toast.makeText(this, "Have to reroute", Toast.LENGTH_SHORT).show();
+//                navCount = 0;
+//          0      //pauseNavigationAndRecord();
+//                //reroute(points,navCount);
+//            }
             if (mLocationMarker != null) {
                 mLocationMarker.remove();
             }
             //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             updateUI(mLastLocation1);
+
+        }catch(NullPointerException e){
+            Log.e(LOGTAG,"points is null");
         }
     }
 
@@ -359,6 +358,7 @@ public class NavigationActivity extends FragmentActivity implements
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        //mLocationRequest.setSmallestDisplacement(5);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -378,17 +378,24 @@ public class NavigationActivity extends FragmentActivity implements
         //double degree= Math.toDegrees(mOrientationAngles[0]);//+ gm.getDeclination();
         //degree=Math.round(degree);
         double degree = Math.round(mOrientationAngles[0] * (180.00 / 3.14));
-        /*if (points != null) {
-            /*Location next = new Location();
-            next.setLatitude(points.get(navCount).latitude);
-            next.setLongitude(points.get(navCount).longitude);
-            double d_required = mLastLocation.bearingTo(next) + 180;
-            */
-            /*double d_required = getBearing(mLastLocation1, points.get(navCount));
+        //if (points != null && mLastLocation!=null && mLocationMarker!=null)
+        try{
+            next = points.get(navCount+1);
+            Location next1 = new Location("");
+            next1.setLatitude(next.latitude);
+            next1.setLongitude(next.longitude);
+            double d_required = mLastLocation.bearingTo(next1);
+            //double d_required = getBearing(mLastLocation1, points.get(navCount));
+            double temp=d_required-degree;
+            if(temp<-180)
+                temp+=360;
+            else if(temp>180)
+                temp-=360;
+            Log.e("OnSensorChanged:","Required:"+ d_required +"degree:" + degree + "temp:" + temp);
             switch (mViewPager.getCurrentItem()) {
                 case 0://toast2.cancel();
                     //toast1.show();
-                    if (navErrorCount == 0 && (((degree + 180) > (d_required - 30)) && ((degree + 180) < (d_required + 30)))) {
+                    if (temp>-30 && temp<=30) {
                         toast4.cancel();
                         toast3.show();
                     } else {
@@ -401,9 +408,12 @@ public class NavigationActivity extends FragmentActivity implements
                     mLocationMarker.setAnchor((float) 0.5, (float) 0.5);
                     mLocationMarker.setRotation((float) degree);
                     break;
-            }*/
+            }
             //orientationTextView.setText(String.valueOf(degree));//+ " $$$$ " + String.valueOf(mOrientationAngles[1]) + " $$$$ " + String.valueOf(mOrientationAngles[2]));
-        //}
+            //}
+        }catch(NullPointerException e){
+            Log.e(LOGTAG,e.getMessage());
+        }
     }
 
     public void updateOrientationAngles() {

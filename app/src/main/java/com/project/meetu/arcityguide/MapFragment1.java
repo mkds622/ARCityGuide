@@ -55,6 +55,7 @@ public class MapFragment1 extends Fragment{
     GoogleMap Map1;
     MapFragment mapFragment;
     ArrayList<LatLng> points;
+    Polyline P1;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)  {
@@ -86,6 +87,28 @@ public class MapFragment1 extends Fragment{
         try {
             points = c1.execute(Origin, Destination).get();
             NavigationActivity.setPoints(points);
+//            NavigationActivity.setPolyline(P1);
+            LatLng src=new LatLng(0.0,0.0);
+            src=points.get(0);
+            LatLng dest=new LatLng(0.0,0.0);
+            dest=points.get(points.size()-1);
+            drawMarker(Map1,src,dest);
+            PolylineOptions polylineOptions = new PolylineOptions();
+            Map1.moveCamera(CameraUpdateFactory.newLatLngZoom(src, 15));
+// Create polyline options with existing LatLng ArrayList
+            polylineOptions.addAll(points);
+            polylineOptions
+                    .width(15)
+                    .color(Color.RED);
+            Polyline l1=Map1.addPolyline(polylineOptions);
+            //l1.setJointType(JointType.ROUND);
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(src)
+                    .zoom(max)
+                    .tilt(90)
+                    .build();
+            Map1.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            NavigationActivity.setPolyline(P1);
         }catch(Exception e){
 
         }
@@ -97,5 +120,35 @@ public class MapFragment1 extends Fragment{
 
         mLocationMarker= Map1.addMarker(mLocationMarkerOptions);
         return mLocationMarker;
+    }
+
+    public void setMapOrientation(LatLng mLastLocation, float degree){
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(mLastLocation)
+                .zoom(max)
+                .tilt(90)
+                .bearing(degree)
+                .build();
+        Map1.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+    public void drawMarker(GoogleMap map1,LatLng source_point,LatLng destination_point) {
+
+        // Creating an instance of MarkerOptions
+        MarkerOptions markerOptions1 = new MarkerOptions();
+        markerOptions1.title("Marker");
+        markerOptions1.snippet("Marker Yo Yo");
+        markerOptions1.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        markerOptions1.position(source_point);
+
+        MarkerOptions markerOptions2 = new MarkerOptions();
+        markerOptions2.title("Marker2");
+        markerOptions2.snippet("Marker Xo Xo");
+        markerOptions2.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        markerOptions2.position(destination_point);
+
+        // Adding marker on the Google Map
+
+        map1.addMarker(markerOptions1);
+        map1.addMarker(markerOptions2);
     }
 }

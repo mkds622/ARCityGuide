@@ -7,17 +7,13 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.meet.scet.arcityguide.MainActivity">
+    tools:context="com.project.meetu.arcityguide.InputActivity">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -26,20 +22,27 @@
                 android:text="Enter Source:"
                 android:id="@+id/Src_textview"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"/>
-            <AutoCompleteTextView
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/Src_Text"
-                android:layout_above="@+id/dest_textView"
-                android:layout_toRightOf="@+id/Src_textview"
-                android:layout_toEndOf="@+id/Src_textview" />
-        </LinearLayout>
+                android:layout_alignParentStart="true"
+                />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
+            <AutoCompleteTextView
+                android:id="@+id/Src_Text"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/dest_textView"
+                android:layout_toEndOf="@+id/Src_textview"
+                android:layout_toRightOf="@+id/Src_textview" />
+            <ImageView
+                android:id="@+id/my_location_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/my_location_button"
+                />
+        </LinearLayout>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -49,8 +52,14 @@
                 android:layout_below="@+id/Src_textview"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
-            <AutoCompleteTextView
-                android:layout_width="200dp"
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <AutoCompleteTextView
+                android:layout_width="350dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/dest_Text"
                 android:layout_above="@+id/dest_textView"
