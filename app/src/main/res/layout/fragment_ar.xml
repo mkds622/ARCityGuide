@@ -9,4 +9,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
+    <android.opengl.GLSurfaceView
+        android:id="@+id/openglview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        />
 </RelativeLayout>

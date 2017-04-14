@@ -2,8 +2,12 @@ package com.project.meetu.arcityguide;
 
 import android.*;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.pm.ConfigurationInfo;
+import android.graphics.PixelFormat;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.app.DialogFragment;
@@ -51,11 +55,19 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import android.os.Handler;
 import android.Manifest;
+import android.widget.Toast;
+
 /**
  * Created by Meetu on 17-02-2017.
  */
 
 public class ARFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback{
+    //Open GL
+    private GLSurfaceView glSurfaceView;
+    private boolean rendererSet=false;
+    DirectionPathRenderer D1;
+
+    //
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
             ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -67,7 +79,7 @@ public class ARFragment extends Fragment implements FragmentCompat.OnRequestPerm
     private static final String FRAGMENT_DIALOG = "dialog";
     private static final String TAG = "Basic Camera Fragment";
     private static final int MAX_PREVIEW_WIDTH = 1920;
-    private static final int MAX_PREVIEW_HEIGHT = 1080;
+    private static final int MAX_PREVIEW_HEIGHT = 1400;
 
     private final TextureView.SurfaceTextureListener mSurfaceTextureListener
             = new TextureView.SurfaceTextureListener() {
@@ -191,13 +203,64 @@ public class ARFragment extends Fragment implements FragmentCompat.OnRequestPerm
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_ar, container, false);
+
+        return inflater.inflate(R.layout.fragment_ar, container, false);
             }
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
             mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
-            }
+        glSurfaceView=(GLSurfaceView)view.findViewById(R.id.openglview);
+        glSurfaceView.setZOrderOnTop(true);
+        glSurfaceView.setEGLContextClientVersion(2);
+        glSurfaceView.setEGLConfigChooser(8,8,8,8,16,0);
+        glSurfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+        //glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+        D1=new DirectionPathRenderer(getActivity());
+        final ActivityManager activityManager =
+                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        final ConfigurationInfo configurationInfo =
+                activityManager.getDeviceConfigurationInfo();
+        final boolean supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000
+                || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
+                && (Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")));
+        if (supportsEs2) {
+// Request an OpenGL ES 2.0 compatible context.
+            glSurfaceView.setEGLContextClientVersion(2);
+// Assign our renderer.
+            glSurfaceView.setRenderer(D1);
+            rendererSet = true;
+        } else {
+            Toast.makeText(getActivity(), "This device does not support OpenGL ES 2.0.", Toast.LENGTH_LONG).show();
+        }
+
+    }
+    public void render(double degreeTBTravelled,double degree){
+        float X = (float) (degreeTBTravelled - degree);
+        if (X < -180)
+            X += 360;
+        else if (X > 180)
+            X -= 360;
+        if(X>=-60 && X<=60) {
+            D1.DrawFrame(X);
+        }
+        else if(X>=-150 && X<-60){
+            D1.drawFrame1();
+        }
+        else if(X>60 && X<=150){
+            D1.drawFrame2();
+        }
+        else
+        {
+            D1.drawFrame3();
+        }
+    }
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
@@ -224,6 +287,9 @@ public class ARFragment extends Fragment implements FragmentCompat.OnRequestPerm
     public void onPause() {
             closeCamera();
             stopBackgroundThread();
+        if (rendererSet) {
+            glSurfaceView.onPause();
+        }
             super.onPause();
             }
 

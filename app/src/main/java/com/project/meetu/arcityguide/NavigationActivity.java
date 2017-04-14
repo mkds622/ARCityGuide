@@ -279,7 +279,7 @@ public class NavigationActivity extends FragmentActivity implements
         try{
             int x=PolyUtil.locationIndexOnPath(mLastLocation1,points,true,30);
             Log.e(LOGTAG,"x="+x +"navcount="+navCount + "NavErrorCOunt="+navErrorCount);
-            if(PolyUtil.isLocationOnPath(mLastLocation1,temp,true,20)==true)
+            if(PolyUtil.isLocationOnPath(mLastLocation1,temp,true,10)==true)
             {
                 Toast.makeText(this,"NavgationComplete", Toast.LENGTH_LONG);
 
@@ -386,22 +386,28 @@ public class NavigationActivity extends FragmentActivity implements
             next1.setLongitude(next.longitude);
             double d_required = mLastLocation.bearingTo(next1);
             //double d_required = getBearing(mLastLocation1, points.get(navCount));
-            double temp=d_required-degree;
-            if(temp<-180)
-                temp+=360;
-            else if(temp>180)
-                temp-=360;
-            Log.e("OnSensorChanged:","Required:"+ d_required +"degree:" + degree + "temp:" + temp);
+
+
+//Required in case of Road Detection
+//            double temp=d_required-degree;
+//            if(temp<-180)
+//                temp+=360;
+//            else if(temp>180)
+//                temp-=360;
+//            Log.e("OnSensorChanged:","Required:"+ d_required +"degree:" + degree + "temp:" + temp);
+
             switch (mViewPager.getCurrentItem()) {
-                case 0://toast2.cancel();
-                    //toast1.show();
-                    if (temp>-30 && temp<=30) {
-                        toast4.cancel();
-                        toast3.show();
-                    } else {
-                        toast3.cancel();
-                        toast4.show();
-                    }
+                case 0:
+//Required in case of Road Detection
+//                    if (temp>-30 && temp<=30) {
+//                        toast4.cancel();
+//                        toast3.show();
+//                    } else {
+//                        toast3.cancel();
+//                        toast4.show();
+//                    }
+                    ARFragment ARtemp=(ARFragment)N1.myFragments.get(0);
+                    ARtemp.render(d_required,degree);
                     break;
                 case 1://toast1.cancel();
                     //toast2.show();
