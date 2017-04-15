@@ -23,6 +23,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Surface;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
@@ -107,7 +109,9 @@ public class NavigationActivity extends FragmentActivity implements
 
     private static final String LOGTAG = "Navigation Activity";
     static Polyline p1;
-
+    Button B1;
+    boolean isNavigationOn,isNavigationComplete;
+    double d_required;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,7 +138,13 @@ public class NavigationActivity extends FragmentActivity implements
                     .addApi(LocationServices.API)
                     .build();
         }
-
+        B1=(Button)findViewById(R.id.navigationControl);
+        B1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startNavigation();
+            }
+        });
         createLocationRequest();
         builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
@@ -158,16 +168,21 @@ public class NavigationActivity extends FragmentActivity implements
 
 
     }
-
     public static void setPoints(ArrayList<LatLng> points1) {
         points = points1;
         size = points.size();
         dest = points.get(size - 1);
         temp=new ArrayList<>();
         temp.add(dest);
-        navCount=0;
     }
+    public void startNavigation(){
+        navCount=0;
+        navErrorCount=0;
+        isNavigationOn=true;
+    }
+    public void reroute(){
 
+    }
     public static void setPolyline(Polyline P1){
         p1=P1;
     }
@@ -276,30 +291,30 @@ public class NavigationActivity extends FragmentActivity implements
         mLastLocation = location;
         mLastLocation1 = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
         Log.d("OnLocationChanged()", "mLastLocation=" + mLastLocation.getLatitude() + " " + mLastLocation.getLongitude() + "mLastLocation1=" + mLastLocation1);
-        try{
-            int x=PolyUtil.locationIndexOnPath(mLastLocation1,points,true,30);
-            Log.e(LOGTAG,"x="+x +"navcount="+navCount + "NavErrorCOunt="+navErrorCount);
-            if(PolyUtil.isLocationOnPath(mLastLocation1,temp,true,10)==true)
-            {
-                Toast.makeText(this,"NavgationComplete", Toast.LENGTH_LONG);
+
+        try {
+            if(isNavigationOn==true){
+            int x = PolyUtil.locationIndexOnPath(mLastLocation1, points, true, 30);
+            Log.e(LOGTAG, "x=" + x + "navcount=" + navCount + "NavErrorCOunt=" + navErrorCount);
+            if (PolyUtil.isLocationOnPath(mLastLocation1, temp, true, 10) == true) {
+                Toast.makeText(this, "NavgationComplete", Toast.LENGTH_LONG);
 
             }
-            if(x==-1){
-                navErrorCount+=1;
-                if(navErrorCount>11){
+            if (x == -1) {
+                navErrorCount += 1;
+                if (navErrorCount > 11) {
                     Toast.makeText(this, "Have to reroute", Toast.LENGTH_SHORT).show();
                     navCount = 0;
-                    navErrorCount=0;
-                //pauseNavigationAndRecord();
-                //reroute(points,navCount);
+                    navErrorCount = 0;
+                    //pauseNavigationAndRecord();
+                    reroute();
                 }
-            }
-            else{
-                navCount=x;
+            } else {
+                navCount = x;
 
             }
             Log.d("OnLocationChanged()", "next" + next);
-
+        }
 //            if (mLastLocation1.latitude == dest.latitude && mLastLocation1.longitude == dest.longitude) {
 //                //endNavigation(true);
 //            }
@@ -380,11 +395,12 @@ public class NavigationActivity extends FragmentActivity implements
         double degree = Math.round(mOrientationAngles[0] * (180.00 / 3.14));
         //if (points != null && mLastLocation!=null && mLocationMarker!=null)
         try{
+            if(isNavigationOn==true){
             next = points.get(navCount+1);
             Location next1 = new Location("");
             next1.setLatitude(next.latitude);
             next1.setLongitude(next.longitude);
-            double d_required = mLastLocation.bearingTo(next1);
+            d_required = mLastLocation.bearingTo(next1);}
             //double d_required = getBearing(mLastLocation1, points.get(navCount));
 
 
@@ -406,8 +422,9 @@ public class NavigationActivity extends FragmentActivity implements
 //                        toast3.cancel();
 //                        toast4.show();
 //                    }
+                    if(isNavigationOn==true){
                     ARFragment ARtemp=(ARFragment)N1.myFragments.get(0);
-                    ARtemp.render(d_required,degree);
+                    ARtemp.render(d_required,degree);}
                     break;
                 case 1://toast1.cancel();
                     //toast2.show();
