@@ -18,7 +18,7 @@ android {
         }
     }
     buildTypes.each {
-        it.buildConfigField "String", "Google_Maps_Geocoding_Api_Key", "\"***REMOVED***\""
+        it.buildConfigField "String", "Google_Maps_Geocoding_Api_Key", "\"AIzaSyB8uafpIPfXALVXmMC2VlkXWxhPiol5gZE\""
     }
 }
 repositories {

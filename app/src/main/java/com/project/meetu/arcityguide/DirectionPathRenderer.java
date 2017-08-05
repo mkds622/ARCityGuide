@@ -56,7 +56,7 @@ public class DirectionPathRenderer implements GLSurfaceView.Renderer {
 
     public void setDegreeAndCalculatePoints(float degree){
         degreeToBePointed=degree;
-        s=(float)(0.8*Math.tan(Math.toRadians(degreeToBePointed))/30);
+        s=(float)(1.6*Math.tan(Math.toRadians(degreeToBePointed))/30);
         float a1x = 0.0f, a1y= -0.50f , b1x = -0.8f, b1y= -0.65f, c1x = -0.80f, c1y= -0.80f, d1x = 0.0f, d1y= -0.65f, e1x = 0.80f, e1y= -0.80f, f1x = 0.80f, f1y= -0.65f;
 //        float a5x = 0.360f, a5y= 0.25f , b5x = 0.21f, b5y= 0.25f, c5x = 0.110f, c5y= 0.150f, d5x = 0.260f, d5y= 0.150f, e5x = 0.410f, e5y= 0.050f, f5x = 0.510f, f5y= 0.150f;
         float z=0;

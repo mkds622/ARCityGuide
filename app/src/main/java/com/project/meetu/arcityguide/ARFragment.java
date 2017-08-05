@@ -248,7 +248,7 @@ public class ARFragment extends Fragment implements FragmentCompat.OnRequestPerm
         else if (X > 180)
             X -= 360;
         if(X>=-60 && X<=60) {
-            D1.DrawFrame(X);
+            D1.DrawFrame(X/2);
         }
         else if(X>=-150 && X<-60){
             D1.drawFrame1();
